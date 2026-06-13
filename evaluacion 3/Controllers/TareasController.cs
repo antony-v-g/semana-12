@@ -16,9 +16,49 @@ public class TareasController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TareaResponseDto>>> GetAll()
+    public async Task<ActionResult<IEnumerable<TareaResponseDto>>> GetAll(
+        [FromQuery] string? estado,
+        [FromQuery] string? prioridad,
+        [FromQuery] DateTime? fechaInicio,
+        [FromQuery] DateTime? fechaFin)
     {
+        if (fechaInicio.HasValue && fechaFin.HasValue && fechaInicio.Value.Date > fechaFin.Value.Date)
+        {
+            return BadRequest("fechaInicio no puede ser mayor que fechaFin.");
+        }
+
         var tareas = await _tareaService.ObtenerTodas();
+
+        if (!string.IsNullOrWhiteSpace(estado))
+        {
+            if (!Enum.TryParse<EstadoTarea>(estado, true, out var estadoFiltro))
+            {
+                return BadRequest("Estado inválido.");
+            }
+
+            tareas = tareas.Where(t => t.Estado == estadoFiltro).ToList();
+        }
+
+        if (!string.IsNullOrWhiteSpace(prioridad))
+        {
+            if (!Enum.TryParse<PrioridadTarea>(prioridad, true, out var prioridadFiltro))
+            {
+                return BadRequest("Prioridad inválida.");
+            }
+
+            tareas = tareas.Where(t => t.Prioridad == prioridadFiltro).ToList();
+        }
+
+        if (fechaInicio.HasValue)
+        {
+            tareas = tareas.Where(t => t.FechaVencimiento.Date >= fechaInicio.Value.Date).ToList();
+        }
+
+        if (fechaFin.HasValue)
+        {
+            tareas = tareas.Where(t => t.FechaVencimiento.Date <= fechaFin.Value.Date).ToList();
+        }
+
         return Ok(tareas.Select(MapToResponse));
     }
 
