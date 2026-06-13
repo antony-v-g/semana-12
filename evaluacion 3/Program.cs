@@ -19,6 +19,12 @@ builder.Services.AddSingleton<SentimientoService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    builder.WebHost.UseUrls($"http://*:{port}");
+}
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
