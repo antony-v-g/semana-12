@@ -1,0 +1,10 @@
+/evaluacion 3/bin/
+/evaluacion 3/obj/
+/evaluacion 3/*.db
+/evaluacion 3/*.log
+/.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DS_Store
